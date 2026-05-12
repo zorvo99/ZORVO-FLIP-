@@ -36,6 +36,61 @@ export interface AIActionItem {
   supplierUrl: string;
 }
 
+export type AIScopeSuggestion = {
+  key: string;
+  label: string;
+  suggestedValue: string | number | boolean;
+  reason: string;
+  status: 'pending' | 'accepted' | 'rejected' | 'conflict';
+  humanValue?: string | number | boolean;
+};
+
+/** AI scope suggestion bundle on a room; never auto-applied to `scope` / `scopeInputs`. */
+export type AIScopeSuggestionsState = {
+  source: 'photo-scan' | 'style-preset';
+  styleName?: string;
+  appliedAt: string;
+  suggestions: AIScopeSuggestion[];
+};
+
+export type PostcodeMarketData = {
+  region: string;
+  labourMultiplier: number;
+  medianHousePrice: number;
+  marketTrend: 'rising' | 'stable' | 'softening';
+  tradieAvailability: 'high' | 'medium' | 'low';
+};
+
+export type DealScoreResult = {
+  score: number;
+  label: 'STRONG DEAL' | 'GOOD PROSPECT' | 'CONDITIONAL' | 'HIGH RISK' | 'AVOID';
+  colour: 'green' | 'amber' | 'red';
+  profitLow: number;
+  profitHigh: number;
+  profitMid: number;
+  roi: number;
+  renoEstimateMid: number;
+  renoEstimateLow: number;
+  renoEstimateHigh: number;
+  estimatedResale: number;
+  confidence: 'low' | 'medium' | 'high';
+};
+
+export type FindSourceContext = {
+  source: 'find';
+  originalAddress: string;
+  suburb: string;
+  yearsHeld: number;
+  opportunityScore: number;
+  purchasePrice?: number;
+  estimatedReno?: number;
+  estimatedResale?: number;
+  strategy?: string;
+  listingUrl?: string;
+  beds?: number;
+  baths?: number;
+};
+
 export interface Dimensions {
   length: number;
   width: number;
@@ -149,6 +204,8 @@ export interface Room {
   estimate?: RoomEstimateBand;
   /** Line-item model v1; totals align with `estimate` when rules apply. */
   pricingV1?: RoomPricingV1;
+  /** AI-proposed scope rows; UI applies to `scope` / `scopeInputs` only on explicit user action. */
+  aiScopeSuggestions?: AIScopeSuggestionsState;
 }
 
 export interface Project {
@@ -163,6 +220,19 @@ export interface Project {
   isUnlocked?: boolean; // Tracks if the project has been paid for
   /** Email captured for this project (local-only; for future sync / comms). */
   ownerEmail?: string;
+  strategy?: 'cosmetic' | 'full-reno' | 'subdivide' | 'long-hold' | 'develop';
+  listingUrl?: string;
+  purchasePrice?: number;
+  findEstimatedReno?: number;
+  findEstimatedResale?: number;
+  findDealScore?: number;
+  findCallbackSent?: boolean;
+  contingencyPercent?: number;
+  isAIDiscoveryUnlocked?: boolean;
+  aiDiscoveryPreview?: AIActionItem[];
+  postcodeData?: PostcodeMarketData;
+  dealScore?: number;
+  dealScoreRevealedAt?: string;
 }
 
 export interface User {

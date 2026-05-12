@@ -8,6 +8,8 @@ import { generateId } from '../utils/id';
 
 const STORAGE_KEY = 'zorvo_iq_projects';
 const USER_KEY = 'zorvo_iq_user';
+/** Persisted non-negative integer; used for AI Discovery / premium actions when wired. */
+const CREDITS_KEY = 'zorvo_iq_credits';
 const LEGACY_STORAGE_KEY = 'renovate_iq_projects';
 const LEGACY_USER_KEY = 'renovate_iq_user';
 let lastStorageError: string | null = null;
@@ -455,6 +457,18 @@ export const logout = () => {
     lastStorageError = 'Failed to clear user session.';
   }
 };
+
+/** Credits balance for gated AI / unlock flows (0 when unset). */
+export function getUserCredits(): number {
+  try {
+    const raw = localStorage.getItem(CREDITS_KEY);
+    if (raw == null || raw === '') return 0;
+    const n = parseInt(raw, 10);
+    return Number.isFinite(n) && n > 0 ? n : 0;
+  } catch {
+    return 0;
+  }
+}
 
 export const createProject = (name: string, address: string, postcode: string, totalBudget: number): Project => {
   const sessionEmail = loadUser()?.email?.trim();

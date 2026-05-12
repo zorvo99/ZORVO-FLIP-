@@ -10,6 +10,9 @@ import Login from './views/Login';
 import NotFound from './views/NotFound';
 import ProjectEstimateSummary from './views/ProjectEstimateSummary';
 import ImportFind from './views/ImportFind';
+import WalkthroughLauncher from './views/WalkthroughLauncher';
+import More from './views/More';
+import Layout from './components/Layout';
 import { syncPaidUnlocksFromServer } from './api/unlockSync';
 import { loadUser } from './store/projectStore';
 
@@ -50,8 +53,26 @@ const App: React.FC = () => {
     if (!loadUser()) return <Login />;
 
     if (baseRoute === '#/' || baseRoute === '' || baseRoute === '#') return <Dashboard />;
+    if (baseRoute === '#/walkthrough') return <WalkthroughLauncher />;
+    if (baseRoute === '#/discover') {
+      return (
+        <Layout title="Discover">
+          <p className="text-sm text-slate-500 leading-relaxed">
+            Discover hub is not built yet. Use AI Discovery from each room when that work is scheduled.
+          </p>
+          <button
+            type="button"
+            onClick={() => { window.location.hash = '#/'; }}
+            className="mt-6 w-full min-h-[48px] rounded-2xl border border-[#1f2e1f] bg-[#111810] text-[10px] font-black uppercase tracking-widest text-slate-200 active:scale-95 transition-all"
+          >
+            Home
+          </button>
+        </Layout>
+      );
+    }
+    if (baseRoute === '#/more') return <More />;
     if (baseRoute === '#/insights') return <AIInsights />;
-    if (baseRoute === '#/analytics') return <Analytics />;
+    if (baseRoute === '#/budget' || baseRoute === '#/analytics') return <Analytics />;
 
     const estimateMatch = baseRoute.match(/^#\/project\/([^/]+)\/estimate\/?$/);
     if (estimateMatch) return <ProjectEstimateSummary projectId={decodeURIComponent(estimateMatch[1])} />;

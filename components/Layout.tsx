@@ -1,6 +1,9 @@
 
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useState } from 'react';
+import type { LucideIcon } from 'lucide-react';
+import { BarChart2, ClipboardList, Home, MoreHorizontal, Sparkles, Zap } from 'lucide-react';
 import { ICONS } from '../constants';
+import { getUserCredits } from '../store/projectStore';
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -10,17 +13,57 @@ interface LayoutProps {
   actions?: React.ReactNode;
 }
 
+const NAV_BADGE_KEY = 'zorvo_iq_nav_notification_count';
+
+const TABS: { id: string; label: string; icon: LucideIcon; hash: string }[] = [
+  { id: 'home', label: 'Home', icon: Home, hash: '#/' },
+  { id: 'walkthrough', label: 'Walk', icon: ClipboardList, hash: '#/walkthrough' },
+  { id: 'discover', label: 'Discover', icon: Sparkles, hash: '#/discover' },
+  { id: 'budget', label: 'Budget', icon: BarChart2, hash: '#/budget' },
+  { id: 'more', label: 'More', icon: MoreHorizontal, hash: '#/more' },
+];
+
+function baseHash(raw: string): string {
+  const h = (raw || '#/').split('?')[0];
+  if (h === '' || h === '#') return '#/';
+  return h;
+}
+
+function activeTabIdForHash(hashRaw: string): string {
+  const h = baseHash(hashRaw);
+  if (h === '#/more' || h === '#/import-find') return 'more';
+  if (h === '#/walkthrough') return 'walkthrough';
+  if (h === '#/discover' || h === '#/insights') return 'discover';
+  if (h === '#/budget' || h === '#/analytics') return 'budget';
+  if (h.startsWith('#/project')) return 'walkthrough';
+  return 'home';
+}
+
+function readNotificationCount(): number {
+  try {
+    const raw = localStorage.getItem(NAV_BADGE_KEY);
+    if (raw == null || raw === '') return 0;
+    const n = parseInt(raw, 10);
+    return Number.isFinite(n) && n > 0 ? n : 0;
+  } catch {
+    return 0;
+  }
+}
+
 const Layout: React.FC<LayoutProps> = ({ children, title, showBack, onBack, actions }) => {
-  const touchStart = useRef<number | null>(null);
-  const touchEnd = useRef<number | null>(null);
-  const minSwipeDistance = 70;
   const [pageUrl, setPageUrl] = useState('');
+  const [routeHash, setRouteHash] = useState(() => window.location.hash || '#/');
+  const [notifCount, setNotifCount] = useState(readNotificationCount);
   const [isOnline, setIsOnline] = useState<boolean>(() =>
     typeof navigator === 'undefined' ? true : navigator.onLine
   );
 
   useEffect(() => {
-    const syncUrl = () => setPageUrl(window.location.href);
+    const syncUrl = () => {
+      setPageUrl(window.location.href);
+      setRouteHash(window.location.hash || '#/');
+      setNotifCount(readNotificationCount());
+    };
     syncUrl();
     window.addEventListener('hashchange', syncUrl);
     return () => window.removeEventListener('hashchange', syncUrl);
@@ -37,32 +80,12 @@ const Layout: React.FC<LayoutProps> = ({ children, title, showBack, onBack, acti
     };
   }, []);
 
-  const handleTouchStart = (e: React.TouchEvent) => {
-    touchEnd.current = null;
-    touchStart.current = e.targetTouches[0].clientX;
-  };
-
-  const handleTouchMove = (e: React.TouchEvent) => {
-    touchEnd.current = e.targetTouches[0].clientX;
-  };
-
-  const handleTouchEnd = () => {
-    if (!touchStart.current || !touchEnd.current) return;
-    const distance = touchStart.current - touchEnd.current;
-    
-    // Swipe Left -> Go to Analytics
-    if (distance > minSwipeDistance && (window.location.hash === '#/' || window.location.hash === '')) {
-      window.location.hash = '#/analytics';
-    }
-    // Swipe Right -> Go to Projects
-    if (distance < -minSwipeDistance && window.location.hash === '#/analytics') {
-      window.location.hash = '#/';
-    }
-  };
-
   const qrSrc =
     pageUrl &&
     `https://api.qrserver.com/v1/create-qr-code/?size=140x140&data=${encodeURIComponent(pageUrl)}`;
+
+  const activeTab = activeTabIdForHash(routeHash);
+  const credits = getUserCredits();
 
   return (
     <div className="min-h-screen md:bg-[#e8ebe6] md:min-h-screen">
@@ -117,9 +140,6 @@ const Layout: React.FC<LayoutProps> = ({ children, title, showBack, onBack, acti
             borderLeft: '1px solid #1f2e1f',
             borderRight: '1px solid #1f2e1f',
           }}
-          onTouchStart={handleTouchStart}
-          onTouchMove={handleTouchMove}
-          onTouchEnd={handleTouchEnd}
         >
       <header style={{
         position: 'sticky',
@@ -162,14 +182,21 @@ const Layout: React.FC<LayoutProps> = ({ children, title, showBack, onBack, acti
             {title}
           </h1>
         </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>{actions}</div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          {credits > 0 && (
+            <span className="flex items-center gap-1 px-2 py-1 rounded-lg bg-[#0f2a1a] border border-[#1f4a2a] text-[9px] font-black text-[#3ddb6f] uppercase tracking-widest shrink-0">
+              <Zap size={10} className="shrink-0" aria-hidden />
+              {credits}
+            </span>
+          )}
+          {actions}
+        </div>
       </header>
 
       <main style={{
         flex: 1,
         overflowY: 'auto',
-        // Bottom nav (64px) + thumb clearance + safe area so CTAs are not covered on mobile
-        paddingBottom: 'max(112px, calc(96px + env(safe-area-inset-bottom, 0px)))',
+        paddingBottom: 'max(120px, calc(80px + env(safe-area-inset-bottom, 0px)))',
         paddingLeft: '16px',
         paddingRight: '16px',
         paddingTop: '16px',
@@ -186,62 +213,49 @@ const Layout: React.FC<LayoutProps> = ({ children, title, showBack, onBack, acti
       </main>
 
       <nav
-        className="md:!max-w-2xl"
+        className="md:!max-w-2xl border-t border-[#1f2e1f] bg-[#0a0d0a] flex flex-col items-stretch shrink-0"
         style={{
-        position: 'fixed',
-        bottom: 0,
-        left: 0,
-        right: 0,
-        maxWidth: '448px',
-        margin: '0 auto',
-        background: 'rgba(17, 24, 16, 0.95)',
-        backdropFilter: 'blur(12px)',
-        borderTop: '1px solid #1f2e1f',
-        height: '64px',
-        padding: '0 48px',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'space-around',
-        zIndex: 10,
-      }}
+          position: 'fixed',
+          bottom: 0,
+          left: 0,
+          right: 0,
+          maxWidth: '448px',
+          margin: '0 auto',
+          zIndex: 10,
+          paddingBottom: 'env(safe-area-inset-bottom, 0px)',
+        }}
       >
-        <button 
-          onClick={() => window.location.hash = '#/'} 
-          style={{
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            gap: '4px',
-            color: (window.location.hash === '#/' || window.location.hash === '' || window.location.hash.startsWith('#/project')) ? '#3ddb6f' : '#64748b',
-            background: 'transparent',
-            border: 'none',
-            cursor: 'pointer',
-          }}
-        >
-          <ICONS.Home />
-          <span style={{ fontSize: '9px', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.08em' }}>Projects</span>
-        </button>
-        <button 
-          onClick={() => window.location.hash = '#/analytics'} 
-          style={{
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            gap: '4px',
-            color: window.location.hash === '#/analytics' ? '#3ddb6f' : '#64748b',
-            background: 'transparent',
-            border: 'none',
-            cursor: 'pointer',
-          }}
-        >
-          <ICONS.Chart />
-          <span style={{ fontSize: '9px', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.08em' }}>Analytics</span>
-        </button>
+        <div className="flex h-16 min-h-[64px] items-stretch justify-between gap-0.5 px-1">
+          {TABS.map(tab => {
+            const Icon = tab.icon;
+            const isActive = activeTab === tab.id;
+            return (
+              <button
+                key={tab.id}
+                type="button"
+                onClick={() => { window.location.hash = tab.hash; }}
+                className={`flex flex-1 min-w-0 flex-col items-center justify-center gap-1 rounded-xl border border-transparent bg-transparent py-2 transition-all active:scale-95 ${
+                  isActive ? 'text-[#3ddb6f]' : 'text-slate-500'
+                }`}
+              >
+                <span className="relative inline-flex">
+                  <Icon size={22} strokeWidth={isActive ? 2.4 : 2} className={isActive ? 'text-[#3ddb6f]' : 'text-slate-500'} aria-hidden />
+                  {notifCount > 0 && tab.id === 'more' && (
+                    <span className="absolute -right-0.5 -top-0.5 h-2 w-2 rounded-full bg-[#3ddb6f] ring-2 ring-[#0a0d0a]" aria-label="Notifications" />
+                  )}
+                </span>
+                <span className="text-[8px] font-black uppercase tracking-widest truncate max-w-full px-0.5">
+                  {tab.label}
+                </span>
+              </button>
+            );
+          })}
+        </div>
       </nav>
         </div>
       </div>
     </div>
   );
-}
+};
 
 export default Layout;
