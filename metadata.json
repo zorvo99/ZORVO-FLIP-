@@ -1,0 +1,7 @@
+{
+  "name": "Zorvo IQ MVP",
+  "description": "Mobile-first renovation decision platform for homeowners to track budgets, estimate materials, and get AI-powered design insights.",
+  "requestFramePermissions": [
+    "camera"
+  ]
+}

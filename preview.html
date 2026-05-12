@@ -1,0 +1,127 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ZorvoIQ Preview</title>
+    <style>
+      :root {
+        --bg: #0b1030;
+        --panel: rgba(255, 255, 255, 0.09);
+        --panel-border: rgba(255, 255, 255, 0.2);
+        --text: #edf2ff;
+      }
+      * { box-sizing: border-box; }
+      body {
+        margin: 0;
+        font-family: Inter, Segoe UI, Arial, sans-serif;
+        color: var(--text);
+        background:
+          radial-gradient(60% 40% at 10% 10%, rgba(146, 120, 255, 0.35), transparent 70%),
+          radial-gradient(60% 40% at 90% 10%, rgba(98, 137, 255, 0.3), transparent 70%),
+          linear-gradient(155deg, #0e1235, #1a2361 65%, #222767);
+      }
+      .wrap { max-width: 1160px; margin: 0 auto; padding: 20px; }
+      .nav {
+        display: flex; align-items: center; justify-content: space-between;
+        background: var(--panel); border: 1px solid var(--panel-border);
+        border-radius: 16px; padding: 12px 16px; position: sticky; top: 10px;
+        backdrop-filter: blur(10px);
+      }
+      .brand { font-size: 26px; font-weight: 800; }
+      .links { display: flex; gap: 16px; font-weight: 600; opacity: 0.9; }
+      .login { border: 1px solid var(--panel-border); background: rgba(255,255,255,0.06); color: white; border-radius: 12px; padding: 8px 14px; }
+      .section {
+        margin-top: 18px; padding: 22px;
+        border: 1px solid var(--panel-border); border-radius: 20px;
+        background: var(--panel); box-shadow: 0 18px 36px rgba(0,0,0,.35);
+      }
+      .hero { display: grid; grid-template-columns: 1.1fr 1fr; gap: 18px; align-items: center; }
+      .hero h1 { font-size: clamp(34px, 4.6vw, 62px); line-height: 1.02; margin: 0 0 10px; }
+      .hero p { margin: 0 0 14px; color: rgba(237,242,255,.88); font-size: 18px; }
+      .btn { border: 0; color: #fff; font-weight: 700; border-radius: 12px; padding: 10px 16px; }
+      .purple { background: linear-gradient(180deg,#947eff,#5f54d7); }
+      .orange { background: linear-gradient(180deg,#f6a764,#d56d2f); }
+      .green { background: linear-gradient(180deg,#84d9ad,#44986a); }
+      .blue { background: linear-gradient(180deg,#89aeff,#4b70d8); }
+      .mock {
+        border-radius: 14px; min-height: 220px; border: 1px solid rgba(255,255,255,.2);
+        background: linear-gradient(135deg, rgba(255,255,255,.16), rgba(255,255,255,.03));
+      }
+      .cards { display: grid; grid-template-columns: repeat(3,1fr); gap: 12px; margin-top: 14px; }
+      .card { padding: 14px; border-radius: 14px; border: 1px solid var(--panel-border); background: rgba(255,255,255,.06); }
+      .card h3 { margin: 0 0 8px; }
+      .statement { text-align: center; font-size: 30px; font-weight: 800; margin: 20px 0 8px; }
+      .product { margin-top: 16px; }
+      .tone-orange { background: linear-gradient(155deg, #221028, #4a1f41 65%, #5d3565); }
+      .tone-green { background: linear-gradient(155deg, #0b2030, #0f3d4a 65%, #123650); }
+      .tone-blue { background: linear-gradient(155deg, #141b4c, #1f2d74 65%, #262d67); }
+      .footer { text-align: center; opacity: .8; margin: 26px 0 12px; }
+      @media (max-width: 900px) {
+        .hero { grid-template-columns: 1fr; }
+        .cards { grid-template-columns: 1fr; }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="wrap">
+      <div class="nav">
+        <div class="brand">ZorvoIQ</div>
+        <div class="links"><span>Find</span><span>Flip</span><span>Fund</span><span>Blog</span></div>
+        <button class="login">Login</button>
+      </div>
+
+      <section class="section">
+        <div class="hero">
+          <div>
+            <h1>Find. Flip. Fund.</h1>
+            <p>The smarter way to succeed in property deals.</p>
+            <button class="btn purple">Get Started</button>
+          </div>
+          <div class="mock"></div>
+        </div>
+        <div class="cards">
+          <div class="card"><h3>Zorvo Find</h3><p>Discover profitable opportunities with speed.</p><button class="btn orange">Learn More</button></div>
+          <div class="card"><h3>Zorvo Flip</h3><p>Estimate, plan, and track renovations in one place.</p><button class="btn green">Get Started</button></div>
+          <div class="card"><h3>Zorvo Fund</h3><p>Present your deal and connect with investors.</p><button class="btn blue">Learn More</button></div>
+        </div>
+        <div class="statement">Powering smarter property investments.</div>
+      </section>
+
+      <section class="section product tone-orange">
+        <div class="hero">
+          <div>
+            <h1 style="font-size:42px">Find profitable property deals faster.</h1>
+            <p>Spot high-potential opportunities with search and analytics.</p>
+            <button class="btn orange">Get Early Access</button>
+          </div>
+          <div class="mock"></div>
+        </div>
+      </section>
+
+      <section class="section product tone-green">
+        <div class="hero">
+          <div>
+            <h1 style="font-size:42px">Manage your renovation projects with ease.</h1>
+            <p>Estimate costs, plan jobs, and track progress clearly.</p>
+            <button class="btn green">Get Started - Free Beta</button>
+          </div>
+          <div class="mock"></div>
+        </div>
+      </section>
+
+      <section class="section product tone-blue">
+        <div class="hero">
+          <div>
+            <h1 style="font-size:42px">Pitch your property deals with confidence.</h1>
+            <p>Present key numbers and connect with funding partners.</p>
+            <button class="btn blue">Join the Waitlist</button>
+          </div>
+          <div class="mock"></div>
+        </div>
+      </section>
+
+      <div class="footer">Standalone preview file for quick browser viewing.</div>
+    </div>
+  </body>
+</html>

@@ -1,0 +1,9 @@
+# Netlify reads this when this folder is the site root (or “Base directory” in the UI).
+# Do not put API keys here — set VITE_GEMINI_API_KEY in Netlify → Site settings → Environment variables.
+
+[build]
+  command = "npm run build"
+  publish = "dist"
+
+[build.environment]
+  NODE_VERSION = "20"

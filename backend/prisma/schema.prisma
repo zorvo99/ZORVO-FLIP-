@@ -1,0 +1,77 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           String    @id @default(cuid())
+  email        String    @unique
+  passwordHash String?
+  createdAt    DateTime  @default(now())
+  projects     Project[]
+}
+
+model OtpCode {
+  id         String    @id @default(cuid())
+  email      String
+  codeHash   String
+  expiresAt  DateTime
+  consumedAt DateTime?
+  attempts   Int       @default(0)
+  createdAt  DateTime  @default(now())
+
+  @@index([email])
+  @@index([expiresAt])
+}
+
+model Project {
+  id          String   @id @default(cuid())
+  name        String
+  description String
+  address     String
+  postcode    String
+  totalBudget Float
+  isUnlocked  Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  userId String
+  user   User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  rooms Room[]
+  draft WalkthroughDraft?
+}
+
+model Room {
+  id           String   @id @default(cuid())
+  name         String
+  type         String
+  dimensions   Json
+  budget       Float
+  photoUrls    Json
+  intendedScope Json
+  notes        String   @default("")
+  scopeInputs  Json
+  expenses     Json
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  projectId String
+  project   Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+}
+
+model WalkthroughDraft {
+  id                 String   @id @default(cuid())
+  walkthroughStep    String
+  selectedRoomCounts Json
+  detailQueue        Json
+  currentDetailIndex Int
+  updatedAt          DateTime @updatedAt
+
+  projectId String  @unique
+  project   Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+}
